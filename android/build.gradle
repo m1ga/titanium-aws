@@ -1,5 +1,3 @@
-apply plugin: 'java'
-
 repositories {
 	google()
 	jcenter()
@@ -7,23 +5,14 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.amazonaws:aws-android-sdk-core:2.8.5'
-  implementation 'com.amazonaws:aws-android-sdk-s3:2.8.5'
-  implementation 'com.amazonaws:aws-android-sdk-machinelearning:2.8.5'
-  implementation 'com.amazonaws:aws-android-sdk-iot:2.8.5'
+  implementation 'com.amazonaws:aws-android-sdk-core:2.77.0'
+  implementation 'com.amazonaws:aws-android-sdk-s3:2.77.0'
+  implementation 'com.amazonaws:aws-android-sdk-machinelearning:2.77.0'
+  implementation 'com.amazonaws:aws-android-sdk-iot:2.77.0'
 
-  implementation('com.amazonaws:aws-android-sdk-mobile-client:2.6.+@aar') { transitive = true }
-  implementation('com.amazonaws:aws-android-sdk-auth-userpools:2.6.+@aar') { transitive = true }
-  implementation('com.amazonaws:aws-android-sdk-auth-core:2.6.+@aar') { transitive = true }
+  implementation('com.amazonaws:aws-android-sdk-mobile-client:2.77.0')
+  implementation('com.amazonaws:aws-android-sdk-auth-userpools:2.77.0')
+  implementation('com.amazonaws:aws-android-sdk-auth-core:2.77.0')
 
-  implementation 'com.google.code.gson:gson:2.8.5'
-}
-
-configurations.all {
-  transitive = false
-}
-
-task getDeps(type: Copy) {
-	from sourceSets.main.runtimeClasspath
-	into 'lib/'
+  implementation 'com.google.code.gson:gson:2.11.0'
 }

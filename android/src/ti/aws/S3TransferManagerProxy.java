@@ -26,6 +26,8 @@ import java.io.File;
 import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobile.client.AWSStartupResult;
 import com.amazonaws.mobile.client.AWSStartupHandler;
+import com.amazonaws.mobile.client.Callback;
+import com.amazonaws.mobile.client.UserStateDetails;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
@@ -64,21 +66,19 @@ public class S3TransferManagerProxy extends KrollProxy
 		Context appContext = TiApplication.getInstance();
 		if (appContext == null) return;
 
-		AmazonS3Client s3Client = new AmazonS3Client(credentialsProvider);
-		s3Client.setRegion(Region.getRegion(Regions.fromName("eu-central-1")));
+		AmazonS3Client s3Client = new AmazonS3Client(credentialsProvider, Region.getRegion(Regions.fromName("eu-central-1")));
+		 TransferUtility transferUtility =
+		 		TransferUtility.builder()
+		 				.context(appContext)
+		 				.awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+		 				.s3Client(s3Client)
+		 				.build();
 
-		TransferUtility transferUtility =
-				TransferUtility.builder()
-						.context(appContext)
-						.awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-						.s3Client(new AmazonS3Client(AWSMobileClient.getInstance().getCredentialsProvider()))
-						.build();
 
-		
 		File nativeFile = new File(Uri.parse(file).getPath());
-		
-		TransferObserver uploadObserver = transferUtility.upload(key, nativeFile);
-		
+
+
+	TransferObserver uploadObserver = transferUtility.upload(key, nativeFile);
 		uploadObserver.setTransferListener(new TransferListener() {
 			@Override
 			public void onStateChanged(int id, TransferState state) {
@@ -86,7 +86,7 @@ public class S3TransferManagerProxy extends KrollProxy
 				if (krollObject == null) {
 					return;
 				}
-				
+
 				if (TransferState.COMPLETED == state) {
 					KrollDict event = new KrollDict();
 					event.put("body", key);
@@ -94,10 +94,10 @@ public class S3TransferManagerProxy extends KrollProxy
 					success.callAsync(krollObject, event);
 				}
 			}
-			
+
 			@Override
 			public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {}
-			
+
 			@Override
 			public void onError(int id, Exception ex) {
 				KrollObject krollObject = getKrollObject();
@@ -124,7 +124,17 @@ public class S3TransferManagerProxy extends KrollProxy
 			return;
 		}
 
-		AWSMobileClient.getInstance().initialize(TiApplication.getInstance().getCurrentActivity()).execute();
+		AWSMobileClient.getInstance().initialize(TiApplication.getAppRootOrCurrentActivity(), new Callback<UserStateDetails>() {
+			@Override
+			public void onResult(UserStateDetails result) {
+				Log.i(LCAT, "onResult: " + result.toString());
+			}
+
+			@Override
+			public void onError(Exception e) {
+				Log.e(LCAT, "Error: " + e.getMessage());
+			}
+		});
 		credentialsProvider = new CognitoCachingCredentialsProvider(appContext, poolId, Regions.fromName(region));
 	}
 }
