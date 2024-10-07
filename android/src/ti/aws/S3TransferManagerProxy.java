@@ -78,7 +78,7 @@ public class S3TransferManagerProxy extends KrollProxy
 		File nativeFile = new File(Uri.parse(file).getPath());
 
 
-	TransferObserver uploadObserver = transferUtility.upload(key, nativeFile);
+		TransferObserver uploadObserver = transferUtility.upload(key, nativeFile);
 		uploadObserver.setTransferListener(new TransferListener() {
 			@Override
 			public void onStateChanged(int id, TransferState state) {
